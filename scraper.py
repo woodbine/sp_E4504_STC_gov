@@ -85,9 +85,11 @@ def convert_mth_strings ( mth_string ):
 #### VARIABLES 1.0
 
 entity_id = "E4504_STC_gov"
-url = 'http://www.southtyneside.gov.uk/article/12041/council-expenditure'
+urls = ['https://www.southtyneside.gov.uk/article/38545/Council-spending-over-500',
+        "https://www.southtyneside.gov.uk/article/38546/Council-expenditure-pre-April-2012"]
 errors = 0
 data = []
+url = 'http://example.com'
 
 #### READ HTML 1.0
 
@@ -98,15 +100,23 @@ soup = BeautifulSoup(html, 'lxml')
 
 #### SCRAPE DATA
 
-links = soup.find_all('a', href =True)
-for link in links:
-    csvfile = link.text.replace('(c)', '').strip()
-    if 'csv' in csvfile:
-        url = 'http://www.southtyneside.gov.uk/' + link['href']
-        csvYr = csvfile.split('[')[0].strip()[-4:]
-        csvMth = csvfile.split('[')[0].strip().split(' ')[-2].strip()[:3]
-        csvMth = convert_mth_strings(csvMth.upper())
-        data.append([csvYr, csvMth, url])
+for url in urls:
+    html = urllib2.urlopen(url)
+    soup = BeautifulSoup(html, 'lxml')
+    links = soup.find_all('a', href =True)
+    for link in links:
+        csvfile = link.text.replace('(c)', '').strip()
+        if '/csv/' in link['href']:
+            if 'HRA' in csvfile:
+                continue
+            csv_name = csvfile.split(u' £500 ')[-1].strip('-').strip().replace('and GPC ', '').replace('Council Spending ', '')
+            if 'July 2010' in csv_name:
+                csvYr = '2011'
+            url = 'http://www.southtyneside.gov.uk' + link['href']
+            csvYr = csv_name.split()[1][:4]
+            csvMth = csv_name.split()[0][:3]
+            csvMth = convert_mth_strings(csvMth.upper())
+            data.append([csvYr, csvMth, url])
 
 
 #### STORE DATA 1.0
