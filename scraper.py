@@ -109,10 +109,13 @@ for url in urls:
         if '/csv/' in link['href']:
             if 'HRA' in csvfile:
                 continue
-            csv_name = csvfile.split(u' £500 ')[-1].strip('-').strip().replace('and GPC ', '').replace('Council Spending ', '')
+            csv_name = csvfile.split(u' £500 ')[-1].strip('-').strip().replace('and GPC ', '').replace('Council Spending ', '').replace('& GPC', '')
             if 'July 2010' in csv_name:
                 csvYr = '2011'
-            url = 'http://www.southtyneside.gov.uk' + link['href']
+            if 'http' not in link['href']:
+                url = 'http://www.southtyneside.gov.uk' + link['href']
+            else:
+                url = link['href']
             csvYr = csv_name.split()[1][:4]
             csvMth = csv_name.split()[0][:3]
             csvMth = convert_mth_strings(csvMth.upper())
